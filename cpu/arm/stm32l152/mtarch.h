@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2012, STMicroelectronics.
+ * Copyright (c) 2016, TOKITA Hiroshi
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,15 +29,18 @@
  *
  *
  */
-/*---------------------------------------------------------------------------*/
-/*
- * Implementation of multithreading in ARM Cortex-M3. To be done.
- */
 #ifndef __MTARCH_H__
 #define __MTARCH_H__
-/*---------------------------------------------------------------------------*/
+
+#ifndef MTARCH_STACKSIZE
+#define MTARCH_STACKSIZE 256
+#endif /* MTARCH_STACKSIZE */
+
 struct mtarch_thread {
-  short mt_thread;
+  unsigned int stack[MTARCH_STACKSIZE];
+  unsigned int *sp;
+  void (*function)(void*);
+  void *data;
 };
-/*---------------------------------------------------------------------------*/
+
 #endif /* __MTARCH_H__ */
