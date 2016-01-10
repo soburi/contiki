@@ -42,7 +42,7 @@ if "Linux" in sysname:
 
 elif ("Win" in sysname) or ("NT" in sysname):
     IS_WINDOWS = True
-    FLASH_PROGRAMMER_DEFAULT_PATH = 'C:\\NXP\\bstudio_nxp\\sdk\\JN-SW-4163\\Tools\\flashprogrammer\\FlashCLI.exe'
+    FLASH_PROGRAMMER_DEFAULT_PATH = 'C:\\NXP\\ProductionFlashProgrammer\\JN51xxProgrammer.exe'
     import motelist_lib.windows_motelist_impl as motelist_impl # @Reimport @UnusedImport
 
 else:
