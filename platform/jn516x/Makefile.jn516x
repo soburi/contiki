@@ -279,7 +279,7 @@ motelistinfo:
 
 ### Flash the given file to all connected jn516x motes
 %.flashall:
-	$(Q)$(MOTELIST) ${FLASH_PROGRAMMER} $*
+	$(Q)$(MOTELIST) ${FLASH_PROGRAMMER} $*.$(TARGET).bin
 
 ### Dump output from all connected jn516x motes
 serialdumpall:
