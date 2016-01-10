@@ -28,105 +28,139 @@
 # This file is part of the Contiki operating system.
 #
 # Author(s): 
-#           Simon Duquennoy <simonduq@sics.se>
+#           Janis Judvaitis
 #           Atis Elsts <atis.elsts@sics.se>
 
-import os, re, subprocess, multiprocessing
-    
+import os, glob, re
+import multiprocessing, subprocess
+
+import codecs
+import json
+
+def cp65001(name):
+    if name.lower() == 'cp65001':
+        return codecs.lookup('utf-8')
+codecs.register(cp65001)
+
+FTDI_VENDOR_ID = "0403"
+FTDI_PRODUCT_ID = "6001"
+
+doPrintVendorID = False
+
+serial_map = None
+def get_serial_map():
+    global serial_map
+    if serial_map == None:
+        wmiout = subprocess.check_output(["powershell",
+            "gwmi -query 'SELECT * FROM Win32_PnPEntity WHERE ClassGuid=\"{4d36e978-e325-11ce-bfc1-08002be10318}\"' | ConvertTo-Json"
+        ])
+        serialjson = json.loads( wmiout.decode("utf-8") )
+
+        serial_map = {}
+        map( lambda d: serial_map.update( {comport_name(d): d} ), serialjson)
+
+    return serial_map
+
+def serial_info(key):
+    return get_serial_map()[key]
+
+def describe(device):
+    """
+    Get a human readable description.
+    Report driver's Caption property.
+    """
+
+    return serial_info(device)["Caption"]
+
+def hwinfo(device):
+    ftdipatt = re.compile(r'^FTDIBUS\\VID_(\d{4})\+PID_(\d{4})\+(\w{8}).*')
+    matched = re.match(ftdipatt, serial_info(device)["DeviceID"])
+    return matched.group(3)
+
+#######################################
+
+def is_nxp_mote(device):
+    ftdipatt = re.compile(r'^FTDIBUS\\VID_(\d{4})\+PID_(\d{4})\+(\w{8}).*')
+    matched = re.match(ftdipatt, device["DeviceID"])
+
+    if matched == None:
+        return False
+    if matched.group(1) != FTDI_VENDOR_ID or matched.group(2) != FTDI_PRODUCT_ID:
+        return False
+    #if device["Manufacturer"] != "NXP":
+    #    return False
+    return True
+
+def comport_name(device):
+    compatt = re.compile(r'.*\((COM\d+)\).*')
+    matched = re.match(compatt, device["Caption"])
+    if matched == None:
+        raise
+
+    return matched.group(1)
+
 def list_motes(flash_programmer):
-    #There is no COM0 in windows. We use this to trigger an error message that lists all valid COM ports
-    cmd = [flash_programmer, '-c', 'COM0']
-    proc = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
-    stdout_value, stderr_value = proc.communicate('through stdin to stdout')
-    com_str = (stderr_value)
-    #print '\tpass through:', repr(stdout_value)
-    #print '\tstderr      :', com_str
-
-    ## Extract COM ports from output:
-    ## Example com_str: "Available ports: ['COM15', 'COM10']" 
-    res = re.compile('\[((?:\'COM\d+\'.?.?)+)\]').search(com_str)
-
-    ports = []
-    if res:
-        port_str=str(res.group(1))
-        ports=port_str.replace('\'', '').replace(',', '').split()
-    return ports
+    return [comport_name(d) for d in get_serial_map().values() if is_nxp_mote(d)]
 
 def extract_information(port, stdout_value):
-    mac_str=''
-    info=''
+    mac_str='Unknown' # not supported on Linux
+    info='' # not properly supported on Linux
+
+    print(stdout_value)
+
+    macpat = re.compile(r'.*(([0-9A-Fa-f]{2}:){7}([0-9A-Fa-f]){2}).*', re.M)
+    matched = re.match(macpat, stdout_value)
+    if matched != None:
+        mac_str = matched.group(1)
+
     is_program_success=''
 
-    #print 'output: ', stdout_value
+    info = describe(port) + ", SerialID: " + hwinfo(port) + "\n"
+    
+    for line in stdout_value.split('\n'):
+        info = info + re.sub("^\s*%s:\s*" % port, '\t', line) + "\n"
 
-#    res = re.compile('Connecting to device on (COM\d+)').search(stdout_value)
-#    if res:
-#        port_str = str(res.group(1))
-
-    ### extracting the following information   
-    '''
-    Devicelabel:           JN516x, BL 0x00080006
-    FlashLabel:            Internal Flash (256K)
-    Memory:                0x00008000 bytes RAM, 0x00040000 bytes Flash
-    ChipPartNo:            8
-    ChipRevNo:             1
-    ROM Version:           0x00080006
-    MAC Address:           00:15:8D:00:00:35:DD:FB
-    ZB License:            0x00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00
-    User Data:             00:00:00:00:00:00:00:00
-    FlashMID:              0xCC
-    FlashDID:              0xEE
-    MacLocation:           0x00000010
-    Sector Length:         0x08000
-    Bootloader Version:    0x00080006
-    '''
-
-    res = re.compile('(Devicelabel.*\sFlashLabel.*\sMemory.*\sChipPartNo.*\sChipRevNo.*\sROM Version.*\sMAC Address.*\sZB License.*\sUser Data.*\sFlashMID.*\sFlashDID.*\sMacLocation.*\sSector Length.*\sBootloader Version\:\s+0x\w{8})').search(stdout_value) 
-    if res:
-        info = str(res.group(1))
-      
-    res = re.compile('MAC Address\:\s+((?:\w{2}\:?){8})').search(stdout_value)
-    if res:
-        mac_str = str(res.group(1))
-
-    res = re.compile('(Program\ssuccessfully\swritten\sto\sflash)').search(stdout_value)
+    res = re.compile('(Success)').search(stdout_value)
     if res:
         is_program_success = str(res.group(1))
+    else:
+        res = re.compile('(Error .*)\n').search(stdout_value)
+        if res:
+            is_program_success = str(res.group(1))
 
     return [mac_str, info, is_program_success] 
-        
+
+
 def program_motes(flash_programmer, motes, firmware_file):
   for m in motes:
-      cmd = [flash_programmer, '-c', m, '-B', '1000000', '-s', '-w', '-f', firmware_file]
-      proc = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
+      cmd = [flash_programmer, '-V', '10', '-v', '-s', m, '-I', '38400', '-P', '1000000', '-f', firmware_file]
+      cmd = " ".join(cmd)
+      proc = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
       stdout_value, stderr_value = proc.communicate('through stdin to stdout')   
       [mac_str, info, is_program_success] = extract_information(m, stdout_value)
-      print m, mac_str, is_program_success
+      print m, is_program_success
 
       errors = (stderr_value)
       if errors != '':
           print 'Errors:', errors  
+
 
 def print_info(flash_programmer, motes, do_mac_only):
     if do_mac_only:
         print "Listing Mac addresses:"
     else:
         print "Listing mote info:"
+
     for m in motes:
-        cmd=[flash_programmer, '-c', m, '-B', '1000000']
+        cmd=[flash_programmer, '-V', '3', '--deviceconfig', '-s', m]
         proc = subprocess.Popen(cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,)
         stdout_value, stderr_value = proc.communicate('through stdin to stdout')
         [mac_str, info, is_program_success] = extract_information(m, stdout_value)
 
-        errors = (stderr_value)
-    
         if do_mac_only:
             print m, mac_str
         else:
             print m, '\n', info, '\n'
-          
-        if errors != '':
-            print 'Errors:', errors
 
 def serialdump(args):
     port_name = args[0]
