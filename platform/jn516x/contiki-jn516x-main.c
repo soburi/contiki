@@ -282,8 +282,11 @@ uint16_t TOS_LOCAL_ADDRESS = 0x1234; /* non-zero */
 int
 main(void)
 {
-  /* Set stack overflow address for detecting overflow in runtime */
-  vAHI_SetStackOverflow(TRUE, ((uint32_t *)&heap_location)[0]);
+  /* Initialize random with a seed from the SoC random generator.
+   * This must be done before selecting the high-precision external oscillator.
+   */
+  vAHI_StartRandomNumberGenerator(E_AHI_RND_SINGLE_SHOT, E_AHI_INTS_DISABLED);
+  random_init(u16AHI_ReadRandomNumber());
 
   clock_init();
   watchdog_init();
