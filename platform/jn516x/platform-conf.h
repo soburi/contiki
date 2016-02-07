@@ -255,7 +255,7 @@ typedef uint32_t clock_time_t;
 
 /* Disable UART SW flow control */
 #ifndef UART_XONXOFF_FLOW_CTRL
-#define UART_XONXOFF_FLOW_CTRL 1
+#define UART_XONXOFF_FLOW_CTRL 0
 #endif /* UART_XONXOFF_FLOW_CTRL */
 
 #ifndef UART_BAUD_RATE

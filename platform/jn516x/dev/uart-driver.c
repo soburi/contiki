@@ -43,6 +43,7 @@
 
 #include "contiki-conf.h"
 #include "uart-driver.h"
+#include "sys/cc.h"
 #include "sys/rtimer.h"
 #include "watchdog.h"
 #include <math.h>
