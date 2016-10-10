@@ -40,6 +40,7 @@
 #include "sys/clock.h"
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 /*---------------------------------------------------------------------------*/
 clock_time_t
@@ -65,6 +66,20 @@ clock_seconds(void)
 void
 clock_delay(unsigned int d)
 {
-  /* Does not do anything. */
+  clock_delay_usec(d);
 }
 /*---------------------------------------------------------------------------*/
+void
+clock_wait(clock_time_t t)
+{
+  clock_time_t start;
+
+  start = clock_time();
+  while(clock_time() - start < t);
+}
+/*---------------------------------------------------------------------------*/
+void
+clock_delay_usec(uint16_t dt)
+{
+  usleep(dt);
+}
