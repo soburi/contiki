@@ -211,12 +211,12 @@ clock_time(void)
 }
 /*---------------------------------------------------------------------------*/
 /**
- * Delay the CPU for a multiple of 0.0625 us.
+ * Delay the CPU for a microsecond.
  */
 void
 clock_delay_usec(uint16_t dt)
 {
-  uint32_t end = clock() + dt;
+  uint32_t end = clock() + dt * 16;
   /* Note: this does not call watchdog periodic() */
   while(CLOCK_LT(clock(), end));
 }
