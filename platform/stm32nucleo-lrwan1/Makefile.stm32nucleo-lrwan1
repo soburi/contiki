@@ -1,0 +1,224 @@
+
+CONTIKI_TARGET_DIRS = .
+
+### Include the board-specific makefile
+PLATFORM_ROOT_DIR = $(CONTIKI)/platform/$(TARGET)
+-include $(PLATFORM_ROOT_DIR)/Makefile.$(BOARD)
+
+#Currently we support only GCC
+GCC=1
+
+CONTIKI_TARGET_DIRS += dev
+CONTIKI_TARGET_DIRS += stm32cube-lib/stm32cube-prj/Src
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/B-L072Z-LRWAN1
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/MLM32L07X01
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/Common
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/CMSIS
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/stm32l0xx_HAL_Driver
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/stm32l0xx_HAL_Driver/Src
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/stm32l0xx_HAL_Driver/Inc
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/Components/Common
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/Components/hts221
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/Components/lps25hb
+CONTIKI_TARGET_DIRS += stm32cube-lib/drivers/BSP/Components/sx1276
+CONTIKI_TARGET_DIRS += stm32cube-lib/Middlewares/Third_Party/Lora/Crypto
+CONTIKI_TARGET_DIRS += stm32cube-lib/Middlewares/Third_Party/Lora/Mac
+CONTIKI_TARGET_DIRS += stm32cube-lib/Middlewares/Third_Party/Lora/Phy
+CONTIKI_TARGET_DIRS += stm32cube-lib/Middlewares/Third_Party/Lora/Utilities
+
+ARCH_DEV = button-sensor.c leds-arch.c radio-sensor.c
+
+STM32l0XX_HAL =\
+	stm32l0xx_hal.c \
+	stm32l0xx_hal_adc.c \
+	stm32l0xx_hal_adc_ex.c \
+	stm32l0xx_hal_comp.c \
+	stm32l0xx_hal_comp_ex.c \
+	stm32l0xx_hal_cortex.c \
+	stm32l0xx_hal_crc.c \
+	stm32l0xx_hal_crc_ex.c \
+	stm32l0xx_hal_cryp.c \
+	stm32l0xx_hal_cryp_ex.c \
+	stm32l0xx_hal_dac.c \
+	stm32l0xx_hal_dac_ex.c \
+	stm32l0xx_hal_dma.c \
+	stm32l0xx_hal_firewall.c \
+	stm32l0xx_hal_flash.c \
+	stm32l0xx_hal_flash_ex.c \
+	stm32l0xx_hal_flash_ramfunc.c \
+	stm32l0xx_hal_gpio.c \
+	stm32l0xx_hal_i2c.c \
+	stm32l0xx_hal_i2c_ex.c \
+	stm32l0xx_hal_i2s.c \
+	stm32l0xx_hal_irda.c \
+	stm32l0xx_hal_iwdg.c \
+	stm32l0xx_hal_lcd.c \
+	stm32l0xx_hal_lptim.c \
+	stm32l0xx_hal_pcd.c \
+	stm32l0xx_hal_pcd_ex.c \
+	stm32l0xx_hal_pwr.c \
+	stm32l0xx_hal_pwr_ex.c \
+	stm32l0xx_hal_rcc.c \
+	stm32l0xx_hal_rcc_ex.c \
+	stm32l0xx_hal_rng.c \
+	stm32l0xx_hal_rtc.c \
+	stm32l0xx_hal_rtc_ex.c \
+	stm32l0xx_hal_smartcard.c \
+	stm32l0xx_hal_smartcard_ex.c \
+	stm32l0xx_hal_smbus.c \
+	stm32l0xx_hal_spi.c \
+	stm32l0xx_hal_tim.c \
+	stm32l0xx_hal_tim_ex.c \
+	stm32l0xx_hal_tsc.c \
+	stm32l0xx_hal_uart.c \
+	stm32l0xx_hal_uart_ex.c \
+	stm32l0xx_hal_usart.c \
+	stm32l0xx_hal_wwdg.c \
+	stm32l0xx_ll_adc.c \
+	stm32l0xx_ll_comp.c \
+	stm32l0xx_ll_crc.c \
+	stm32l0xx_ll_crs.c \
+	stm32l0xx_ll_dac.c \
+	stm32l0xx_ll_dma.c \
+	stm32l0xx_ll_exti.c \
+	stm32l0xx_ll_gpio.c \
+	stm32l0xx_ll_i2c.c \
+	stm32l0xx_ll_lptim.c \
+	stm32l0xx_ll_lpuart.c \
+	stm32l0xx_ll_pwr.c \
+	stm32l0xx_ll_rcc.c \
+	stm32l0xx_ll_rng.c \
+	stm32l0xx_ll_rtc.c \
+	stm32l0xx_ll_spi.c \
+	stm32l0xx_ll_tim.c \
+	stm32l0xx_ll_usart.c \
+	stm32l0xx_ll_utils.c \
+
+
+component_sx1276 = sx1276.c
+bsp_b-l072z-lrwan1 = b-l072z-lrwan1.c
+bsp_mlm32l07x01 = mlm32l07x01.c
+
+MiddleWare_LoRa = delay.c low_power.c timeServer.c utilities.c
+
+ARCH+=$(ARCH_DEV)
+ARCH+=$(STM32l0XX_HAL)
+
+ARCH+=$(component_sx1276)
+ARCH+=$(bsp_b-l072z-lrwan1)
+ARCH+=$(bsp_mlm32l07x01)
+ARCH+=$(MiddleWare_LoRa)
+
+ARCH+= stm32cube_hal_init.c \
+       debug.c \
+       hw_spi.c \
+       hw_gpio.c \
+       hw_rtc.c \
+       vcom.c \
+       mlm32l0xx_it.c \
+       mlm32l0xx_hw.c \
+       mlm32l0xx_hal_msp.c
+
+
+ARCH+= sx1276-radio.c
+
+CFLAGS += \
+		-DSTM32L072xx \
+		-DUSE_B_L072Z_LRWAN1 \
+		-DUSE_HAL_DRIVER \
+		-DUSE_BAND_868 \
+		-DUSE_MODEM_LORA
+
+
+CFLAGS += -I. \
+	  -I$(CONTIKI)/platform/$(TARGET)/ \
+	  -I$(CONTIKI)/platform/$(TARGET)/stm32cube-lib/stm32cube-prj/Inc \
+	  -I$(CONTIKI)/platform/$(TARGET)/stm32cube-lib/drivers/Common \
+	  -I$(CONTIKI)/platform/$(TARGET)/stm32cube-lib/drivers/CMSIS \
+	  -I$(CONTIKI)/platform/$(TARGET)/stm32cube-lib/drivers/stm32l0xx_HAL_Driver/Inc \
+	  -I$(CONTIKI)/cpu/arm/stm32l072 \
+	  -I$(CONTIKI)/core                   \
+	  -I$(CONTIKI)/platform/$(TARGET)/dev
+
+ifdef UIP_CONF_IPV6
+CFLAGS += -DWITH_UIP6=1
+endif
+
+
+ifndef CONTIKI_TARGET_MAIN
+CONTIKI_TARGET_MAIN = contiki-lrwan1-main.c
+endif
+
+CONTIKI_TARGET_SOURCEFILES += $(ARCH) $(CONTIKI_TARGET_MAIN)
+
+MCU=stm32l072
+CONTIKI_CPU=$(CONTIKI)/cpu/arm/stm32l072
+include $(CONTIKI)/cpu/arm/stm32l072/Makefile.stm32l072
+
+
+MODULES+=core/net \
+         core/net/mac core/net/mac/contikimac \
+         core/net/llsec
+
+
+# build rules ------------------------------------
+
+CLEAN += *.stm32nucleo-lrwan1 symbols.c symbols.h contiki-stm32nucleo-lrwan1.log 
+
+contiki-$(TARGET).a: ${addprefix $(OBJECTDIR)/,symbols.o}
+
+help:
+	@echo A few useful make commands:
+	@echo make help - shows this help
+	@echo make TARGET=stm32nucleo-lrwan1 savetarget - stores selection of target to avoid using TARGET= on every make invokation
+	@echo make program.upload - compiles and uploads program to connected board
+	@echo make program.upload IAR=1 - uses the IAR compiler instead of gcc (not implemented yet)
+	@echo make program.upload NODEID=x - uploads with node_id set to x
+
+# Serialdump rules
+ifeq ($(HOST_OS),Windows)
+  SERIALDUMP = serialdump-windows
+  # this ID is a string with which the node identifies itself as, and is used to
+  # find the proper /dev/comX-port in Cygwin to connect to.
+  CYGWIN_DEV_ID="stm32nucleo-lrwan1 LoRaWAN Platform"
+# include $(CONTIKI)/tools/cygwin/Makefile.cygwin
+endif
+ifeq ($(HOST_OS),Darwin)
+  SERIALDUMP = serialdump-macos
+endif
+ifndef SERIALDUMP
+  # Assume Linux
+  SERIALDUMP = serialdump-linux
+endif
+
+# IAR/windows/cygwin only for now; after GCC port, see if stm32flash works with Linux
+STLINKCLI=ST-LINK_CLI.exe
+%.upload: %.hex
+	#Note: this command only uploads to a single connected device
+	#$(STLINKCLI) -ME || $(STLINKCLI) -ME || $(STLINKCLI) -ME || $(STLINKCLI) -ME
+	$(STLINKCLI) -Q -P $*.hex -V -Run
+
+
+# devcon requires WinDriverKit, downloadable from microsoft.com
+DEVCON=devcon.exe
+DEVCON_ALLDEVS=$(shell $(DEVCON) find =USB | grep "STMicroelectronics STLink dongle" | cut -d " " -f 1)
+devcon_enableonly:
+	devcon disable =USB @"USB\VID_0483&PID_3748\*"
+	devcon enable =USB @"$(ID)"
+
+%.uploadall: %.hex
+	$(foreach D,$(DEVCON_ALLDEVS), echo D IS "$(D)" && make devcon_enableonly ID="$(D)" && make $*.upload && ) echo "Done"
+	devcon enable =USB @"USB\VID_0483&PID_3748\*"
+
+login:
+	@echo "Connecting to $(COMPORT)"
+	$(CONTIKI)/tools/sky/$(SERIALDUMP) -b115200 $(COMPORT)
+
+%.ramusage: %.$(TARGET)
+	$(NM) -S $< --size-sort --line-numbers | grep -v " T " | grep -v " t "
+%.romusage: %.$(TARGET)
+	$(NM) -S $< --size-sort --line-numbers | grep -v " b " | grep -v " B " | grep -v " d " | grep -v " D "
+
+
+
+
