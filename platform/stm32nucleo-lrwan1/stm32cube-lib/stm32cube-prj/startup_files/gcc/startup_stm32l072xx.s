@@ -151,7 +151,7 @@ g_pfnVectors:
   .word  0
   .word  0
   .word  PendSV_Handler
-  .word  SysTick_Handler
+  .word  st_lib_sys_tick_handler		/* see clock.c */
   .word     WWDG_IRQHandler                   /* Window WatchDog              */
   .word     PVD_IRQHandler                    /* PVD through EXTI Line detection */
   .word     RTC_IRQHandler                    /* RTC through the EXTI line     */
@@ -205,8 +205,8 @@ g_pfnVectors:
    .weak      PendSV_Handler
    .thumb_set PendSV_Handler,Default_Handler
 
-   .weak      SysTick_Handler
-   .thumb_set SysTick_Handler,Default_Handler
+   .weak      st_lib_sys_tick_handler			/* see clock.c */
+   .thumb_set st_lib_sys_tick_handler,Default_Handler	/* see clock.c */
 
    .weak      WWDG_IRQHandler
    .thumb_set WWDG_IRQHandler,Default_Handler

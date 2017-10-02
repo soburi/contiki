@@ -55,7 +55,7 @@
 /* misc */
 #define st_lib_tim2_irq_handler(...)                      TIM2_IRQHandler(__VA_ARGS__)
 #define st_lib_spirit_management_set_frequency_base(...)  SpiritManagementSetFrequencyBase(__VA_ARGS__)
-#define st_lib_sys_tick_handler(...)                      SysTick_Handler(__VA_ARGS__)
+//#define st_lib_sys_tick_handler(...)                      SysTick_Handler(__VA_ARGS__)
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
