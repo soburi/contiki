@@ -147,10 +147,10 @@ g_pfnVectors:
   .word  0
   .word  0
   .word  0
-  .word  SVC_Handler
+  .word  svcall_handler				/* see mtarch.c */
   .word  0
   .word  0
-  .word  PendSV_Handler
+  .word  pendsv_handler				/* see mtarch.c */
   .word  st_lib_sys_tick_handler		/* see clock.c */
   .word     WWDG_IRQHandler                   /* Window WatchDog              */
   .word     PVD_IRQHandler                    /* PVD through EXTI Line detection */
@@ -199,11 +199,11 @@ g_pfnVectors:
    .weak      HardFault_Handler
    .thumb_set HardFault_Handler,Default_Handler
 
-   .weak      SVC_Handler
-   .thumb_set SVC_Handler,Default_Handler
+   .weak      svcall_handler				/* see mtarch.c */
+   .thumb_set svcall_handler,Default_Handler		/* see mtarch.c */
 
-   .weak      PendSV_Handler
-   .thumb_set PendSV_Handler,Default_Handler
+   .weak      pendsv_handler				/* see mtarch.c */
+   .thumb_set pendsv_handler,Default_Handler		/* see mtarch.c */
 
    .weak      st_lib_sys_tick_handler			/* see clock.c */
    .thumb_set st_lib_sys_tick_handler,Default_Handler	/* see clock.c */

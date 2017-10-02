@@ -63,4 +63,3 @@ LDFLAGS += -Wl,--undefined=_reset_vector__,--undefined=InterruptVectors,--undefi
 endif   # /SMALL
 
 
-CFLAGS += -D__CLZ=__builtin_clz

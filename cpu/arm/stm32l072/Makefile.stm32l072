@@ -6,7 +6,7 @@
 CONTIKI_CPU=$(CONTIKI)/cpu/arm/stm32l072
 
 # Source folders for contiki cpu files
-CONTIKI_CPU_DIRS =  . 
+CONTIKI_CPU_DIRS =  . ../common/sys
 
 # source files: proprietary sources for startup. Refer to CMSIS docs.
 PROP_SYS_ARCH_C = system_stm32l0xx.c
@@ -22,7 +22,8 @@ endif
 # source files: Contiki arch source files
 CONTIKI_CPU_ARCH=   watchdog.c                                \
                     rtimer-arch.c                             \
-                    clock.c				      
+                    clock.c				      \
+		    mtarch.c
 
 ifdef GCC 
 CONTIKI_CPU_PORT=   syscalls.c                                  \
@@ -70,6 +71,12 @@ CFLAGS+=\
 	-DIAR_ARM_CM0PLUS \
 	-DVECT_TAB_FLASH \
 	-DWITH_UIP6
+
+CFLAGS+= -DCMSIS_DEV_HDR=\"stm32l072xx.h\"
+
+CFLAGS+=\
+	-DSVCall_IRQn=SVC_IRQn \
+	-D__CLZ=__builtin_clz
 
 # ------------------------------------------------------------------ Build rules
 CUSTOM_RULE_C_TO_CE=yes
