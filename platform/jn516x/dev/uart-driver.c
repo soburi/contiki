@@ -48,6 +48,11 @@
 #include <math.h>
 #include <AppHardwareApi.h>
 
+#ifndef ABS
+#define ABS(n)      (((n) < 0) ? -(n) : (n))
+#endif
+
+
 #if UART_XONXOFF_FLOW_CTRL
 
 #include "sys/process.h"

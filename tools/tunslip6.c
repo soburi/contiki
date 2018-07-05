@@ -876,6 +876,7 @@ exit(1);
     err(1, "usage: %s [-B baudrate] [-H] [-L] [-s siodev] [-t tundev] [-T] [-v verbosity] [-d delay] [-a serveraddress] [-p serverport] ipaddress", prog);
   }
   ipaddr = argv[1];
+  fprintf(stderr, "argument ipaddr=%s", ipaddr);
 
   if(baudrate != -2) { /* -2: use default baudrate */
     b_rate = select_baudrate(baudrate);

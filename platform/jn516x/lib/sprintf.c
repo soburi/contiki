@@ -218,8 +218,19 @@ printf(const char *fmt, ...)
   va_start(va, fmt);
   m = vsnprintf(str, sizeof(str), fmt, va);
   va_end(va);
+  if(m > 0)
+  {
+    putchar(0300); // SLIP_END
+    putchar('\r');
+  }
+
   for(i = 0; i < m; i++) {
     putchar(str[i]);
+  }
+
+  if(m > 0)
+  {
+    putchar(0300); // SLIP_END
   }
   return m;
 }
