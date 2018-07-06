@@ -51,7 +51,7 @@
 #include "net/rpl/rpl-ns.h"
 #include "net/packetbuf.h"
 
-#define DEBUG DEBUG_NONE
+#define DEBUG DEBUG_PRINT
 #include "net/ip/uip-debug.h"
 
 #include <limits.h>
@@ -78,10 +78,19 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
   uip_ds6_route_t *route;
   rpl_parent_t *sender = NULL;
 
-  if(UIP_HBHO_BUF->len != ((RPL_HOP_BY_HOP_LEN - 8) / 8)
-      || UIP_EXT_HDR_OPT_RPL_BUF->opt_type != UIP_EXT_HDR_OPT_RPL
-      || UIP_EXT_HDR_OPT_RPL_BUF->opt_len != RPL_HDR_OPT_LEN) {
-
+//  if(UIP_HBHO_BUF->len != ((RPL_HOP_BY_HOP_LEN - 8) / 8)
+//      || UIP_EXT_HDR_OPT_RPL_BUF->opt_type != UIP_EXT_HDR_OPT_RPL
+//      || UIP_EXT_HDR_OPT_RPL_BUF->opt_len != RPL_HDR_OPT_LEN) {
+  if(UIP_EXT_HDR_OPT_RPL_BUF->opt_type != UIP_EXT_HDR_OPT_RPL) {
+    PRINTF("rpl_remove_header %d\n", __LINE__);
+    PRINTF("RPL: Hop-by-hop extension header has wrong size or type (%u %u %u)\n",
+        UIP_HBHO_BUF->len,
+        UIP_EXT_HDR_OPT_RPL_BUF->opt_type,
+        UIP_EXT_HDR_OPT_RPL_BUF->opt_len);
+    return 0; /* Drop */
+  }
+  else if(UIP_EXT_HDR_OPT_RPL_BUF->opt_len != RPL_HDR_OPT_LEN) {
+    PRINTF("rpl_remove_header %d\n", __LINE__);
     PRINTF("RPL: Hop-by-hop extension header has wrong size or type (%u %u %u)\n",
         UIP_HBHO_BUF->len,
         UIP_EXT_HDR_OPT_RPL_BUF->opt_type,
@@ -89,13 +98,17 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
     return 0; /* Drop */
   }
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   instance = rpl_get_instance(UIP_EXT_HDR_OPT_RPL_BUF->instance);
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if(instance == NULL) {
+    PRINTF("rpl_remove_header %d\n", __LINE__);
     PRINTF("RPL: Unknown instance: %u\n",
            UIP_EXT_HDR_OPT_RPL_BUF->instance);
     return 0;
   }
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if(UIP_EXT_HDR_OPT_RPL_BUF->flags & RPL_HDR_OPT_FWD_ERR) {
     PRINTF("RPL: Forward error!\n");
     /* We should try to repair it by removing the neighbor that caused
@@ -115,18 +128,22 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
     return 0;
   }
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if(!instance->current_dag->joined) {
     PRINTF("RPL: No DAG in the instance\n");
     return 0;
   }
   down = 0;
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if(UIP_EXT_HDR_OPT_RPL_BUF->flags & RPL_HDR_OPT_DOWN) {
     down = 1;
   }
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   sender_rank = UIP_HTONS(UIP_EXT_HDR_OPT_RPL_BUF->senderrank);
   sender = nbr_table_get_from_lladdr(rpl_parents, packetbuf_addr(PACKETBUF_ADDR_SENDER));
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if(sender != NULL && (UIP_EXT_HDR_OPT_RPL_BUF->flags & RPL_HDR_OPT_RANK_ERR)) {
     /* A rank error was signalled, attempt to repair it by updating
      * the sender's rank from ext header */
@@ -139,6 +156,7 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
     }
   }
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   sender_closer = sender_rank < instance->current_dag->rank;
 
   PRINTF("RPL: Packet going %s, sender closer %d (%d < %d)\n", down == 1 ? "down" : "up",
@@ -147,6 +165,7 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
    instance->current_dag->rank
    );
 
+  PRINTF("rpl_remove_header %d\n", __LINE__);
   if((down && !sender_closer) || (!down && sender_closer)) {
     PRINTF("RPL: Loop detected - senderrank: %d my-rank: %d sender_closer: %d\n",
            sender_rank, instance->current_dag->rank,
@@ -602,16 +621,25 @@ rpl_remove_header(void)
     switch(*uip_next_hdr) {
       case UIP_PROTO_HBHO:
       case UIP_PROTO_ROUTING:
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         /* Remove hop-by-hop and routing headers */
         *uip_next_hdr = UIP_EXT_BUF->next;
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         rpl_ext_hdr_len = (UIP_EXT_BUF->len * 8) + 8;
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         temp_len = UIP_IP_BUF->len[1];
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         uip_len -= rpl_ext_hdr_len;
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         UIP_IP_BUF->len[1] -= rpl_ext_hdr_len;
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         if(UIP_IP_BUF->len[1] > temp_len) {
+        PRINTF("rpl_remove_header %d\n", __LINE__);
           UIP_IP_BUF->len[0]--;
         }
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         PRINTF("RPL: Removing RPL extension header (type %u, len %u)\n", *uip_next_hdr, rpl_ext_hdr_len);
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         memmove(UIP_EXT_BUF, ((uint8_t *)UIP_EXT_BUF) + rpl_ext_hdr_len, uip_len - UIP_IPH_LEN);
         break;
       case UIP_PROTO_DESTO:
@@ -624,7 +652,9 @@ rpl_remove_header(void)
          * UIP_PROTO_DESTO. Otherwise, we'll return.
          */
         /* Move to next header */
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         uip_next_hdr = &UIP_EXT_BUF->next;
+        PRINTF("rpl_remove_header %d\n", __LINE__);
         uip_ext_len += (UIP_EXT_BUF->len << 3) + 8;
     default:
       return;

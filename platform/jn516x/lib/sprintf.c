@@ -49,6 +49,12 @@
 #include <string.h>
 #include "dev/uart0.h"
 
+#define SLIP_END      0300
+#define SLIP_ESC      0333
+#define SLIP_ESC_END  0334
+#define SLIP_ESC_ESC  0335
+
+
 static char *bf, buf[14], uc, zs;
 static unsigned int num;
 
@@ -220,17 +226,28 @@ printf(const char *fmt, ...)
   va_end(va);
   if(m > 0)
   {
-    putchar(0300); // SLIP_END
+    putchar(SLIP_END); // SLIP_END
     putchar('\r');
   }
 
   for(i = 0; i < m; i++) {
-    putchar(str[i]);
+    switch(((unsigned char*)str)[i]) {
+      case SLIP_END:
+        putchar(SLIP_ESC);
+	putchar(SLIP_ESC_END);
+	break;
+      case SLIP_ESC:
+	putchar(SLIP_ESC);
+	putchar(SLIP_ESC_ESC);
+	break;
+      default:
+	putchar(str[i]);
+    }
   }
 
   if(m > 0)
   {
-    putchar(0300); // SLIP_END
+    putchar(SLIP_END); // SLIP_END
   }
   return m;
 }
