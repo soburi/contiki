@@ -36,7 +36,7 @@
 
 #define MAC_CONFIG_NULLRDC                    0
 #define MAC_CONFIG_CONTIKIMAC                 1
-#define MAC_CONFIG_TSCH                       0
+#define MAC_CONFIG_TSCH                       2
 /* Select a MAC configuration */
 #define MAC_CONFIG MAC_CONFIG_TSCH
 

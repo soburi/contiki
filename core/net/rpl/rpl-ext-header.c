@@ -78,8 +78,11 @@ rpl_verify_hbh_header(int uip_ext_opt_offset)
   uip_ds6_route_t *route;
   rpl_parent_t *sender = NULL;
 
+  /* QUICKPATCH: UIP_EXT_HDR_OPT_RPL_BUF may not aligned */
+  uint32_t opt_type_check = (UIP_EXT_HDR_OPT_RPL_BUF->opt_type != UIP_EXT_HDR_OPT_RPL);
+
   if(UIP_HBHO_BUF->len != ((RPL_HOP_BY_HOP_LEN - 8) / 8)
-      || UIP_EXT_HDR_OPT_RPL_BUF->opt_type != UIP_EXT_HDR_OPT_RPL
+      || opt_type_check
       || UIP_EXT_HDR_OPT_RPL_BUF->opt_len != RPL_HDR_OPT_LEN) {
 
     PRINTF("RPL: Hop-by-hop extension header has wrong size or type (%u %u %u)\n",
